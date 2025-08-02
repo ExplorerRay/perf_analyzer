@@ -34,6 +34,13 @@ changes in performance as you experiment with different optimization strategies.
 
 <br>
 
+# Usage
+```bash
+docker build -t genaiperf .
+
+docker run --rm -it -v $(pwd):/aiperf genaiperf
+```
+
 # Features
 
 ### Inference Load Modes
