@@ -7,8 +7,11 @@ RUN apt-get update \
  && apt-get autoremove --yes \
  && rm -rf /var/lib/apt/lists/*
 
-RUN pip install genai-perf --break-system-packages
+RUN pip install perf_analyzer --break-system-packages
 
-ENTRYPOINT ["genai-perf config -f /aiperf/config.yml"]
-#CMD ["/bin/bash"]
+COPY ./genai-perf /genai-perf/
 
+RUN pip install /genai-perf --break-system-packages
+
+ENTRYPOINT ["genai-perf", "config", "-f", "/aiperf/config.yml", "--override-config"]
+# CMD ["/bin/bash"]
