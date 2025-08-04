@@ -1,3 +1,4 @@
+config_template:
   model_names: gemma3:1b
 
   analyze:
@@ -102,4 +103,3 @@
   process:
     # Uncomment the lines below to enable the process-export-files subcommand
     #   input_path:
-
