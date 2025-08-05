@@ -1,105 +1,53 @@
-config_template:
-  model_names: gemma3:1b
+# Copyright (c) 2025, NVIDIA CORPORATION. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#  * Neither the name of NVIDIA CORPORATION nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+url: "192.168.0.155"
 
-  analyze:
-    # Uncomment the lines below to enable the analyze subcommand
-    # # For further details see analyze.md
-    #   concurrency:
-    #     start: 1
-    #     stop: 1024
+models:
+  - "llama2:7b"
+  - "mistral:7b"
+  - "falcon:7b"
 
-  endpoint:
-    model_selection_strategy: round_robin
-    #backend: vllm
-    custom:
-    type: chat
-    streaming: False
-    #server_metrics_urls: http://localhost:9400/metrics
-    url: 10.5.6.103:11434
-    grpc_method:
-
-  perf_analyzer:
-    path: perf_analyzer
-    verbose: False
-    stimulus: {'concurrency': 1}
-    stability_percentage: 999
-    warmup_request_count: 3
-
-    measurement:
-      mode: request_count
-      # If left unset, the default value will be inferred based on the mode.
-      num:
-
+token_confs:
   input:
-    batch_size: 1
-    extra:
-    goodput:
-    header:
-    file:
-    num_dataset_entries: 100
-    random_seed: 0
-
-    audio:
-      batch_size: 1
-      format: wav
-      depths: 16
-      sample_rates: 16
-      num_channels: 1
-
-      length:
-        mean: 0
-        stddev: 0
-
-    image:
-      batch_size: 1
-      format: png
-
-      width:
-        mean: 0
-        stddev: 0
-
-      height:
-        mean: 0
-        stddev: 0
-
-    output_tokens:
-      mean: 50
-      #deterministic: False
-      stddev: 0
-
-    synthetic_tokens:
-      mean: 550
-      stddev: 0
-
-    prefix_prompt:
-      num: 0
-      length: 100
-
-    sessions:
-      num: 0
-
-      turns:
-        mean: 1
-        stddev: 0
-
-      turn_delay:
-        mean: 0
-        ratio: 1.0
-        stddev: 0
-
+    - name: "input-S" # < 256
+      mean: 150
+      stddev: 50
+    - name: "input-M" # 256 - 1024
+      mean: 650
+      stddev: 150
+    - name: "input-L" # <= 8192
+      mean: 4000
+      stddev: 500
   output:
-    artifact_directory: artifacts
-    checkpoint_directory: checkpoint
-    profile_export_file: profile_export.json
-    generate_plots: False
-    enable_checkpointing: False
-
-  tokenizer:
-    # By default this is the model's name
-    name: hf-internal-testing/llama-tokenizer
-    revision: main
-    trust_remote_code: False
-
-  process:
-    # Uncomment the lines below to enable the process-export-files subcommand
-    #   input_path:
+    - name: "output-S" # < 100
+      mean: 50
+      stddev: 10
+    - name: "output-M" # 100 - 350
+      mean: 200
+      stddev: 40
+    - name: "output-L" # >= 350
+      mean: 480
+      stddev: 80
