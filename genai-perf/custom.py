@@ -75,6 +75,7 @@ if __name__ == "__main__":
             for o in outputs:
                 # render the template with the current model and token configuration
                 rendered_config = template.render(
+                    url=config.get("url", ""),
                     model=model,
                     synthetic_mean=str(i.get("mean")),
                     synthetic_stddev=str(i.get("stddev")),
