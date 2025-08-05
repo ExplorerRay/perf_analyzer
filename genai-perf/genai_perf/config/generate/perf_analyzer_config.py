@@ -109,7 +109,12 @@ class PerfAnalyzerConfig:
         model_objective_parameters: Optional[ModelObjectiveParameters],
     ) -> Path:
         artifact_name = [self._get_artifact_model_name(config)]
-        artifact_name += self._get_artifact_service_kind(config)
+        # artifact_name += self._get_artifact_service_kind(config)
+        artifact_name += [
+            str(config.input.synthetic_tokens.mean)
+            + "-"
+            + str(config.input.output_tokens.mean)
+        ]
 
         stimulus = self._get_artifact_stimulus_type(config, model_objective_parameters)
         if stimulus:
