@@ -36,6 +36,7 @@ RUN pip install perf_analyzer --break-system-packages
 
 COPY ./genai-perf /genai-perf/
 
-RUN pip install /genai-perf --break-system-packages
+RUN pip install /genai-perf --break-system-packages \
+    && pip cache purge
 
 CMD ["python3", "/genai-perf/custom.py", "--config", "/aiperf/config.yml", "--template", "/aiperf/config.yml.j2"]
