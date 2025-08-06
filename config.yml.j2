@@ -22,13 +22,13 @@ config_template:
     path: perf_analyzer
     verbose: False
     stimulus: {'concurrency': 1}
-    stability_percentage: 999
+    stability_percentage: 100
     warmup_request_count: 1
 
     measurement:
       mode: request_count
       # If left unset, the default value will be inferred based on the mode.
-      num:
+      num: 300
 
   input:
     batch_size: 1
