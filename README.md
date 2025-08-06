@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2020-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+Copyright (c) 2020-2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -35,10 +35,21 @@ changes in performance as you experiment with different optimization strategies.
 <br>
 
 # Usage
+## Docker
 ```bash
 docker build -t genaiperf .
 
-docker run --rm -it -v $(pwd):/aiperf genaiperf
+docker run --rm -it -v $(pwd):/aiperf -v $(pwd)/artifacts:/artifacts genaiperf
+```
+
+## K8S
+```bash
+# kubectl create cm genai-perf-config --from-file=config.yml --from-file=config.yml.j2
+
+kubectl apply -f k8s/job.yml
+
+kubectl create -n genai-perf cm genai-perf-config --from-file config.yml --from-file config.yml.j2 -o yaml --dry-run=client > k8s/cm.yml
+kubectl apply -f k8s/cm.yml
 ```
 
 # Features

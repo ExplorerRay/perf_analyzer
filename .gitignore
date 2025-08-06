@@ -11,3 +11,6 @@ artifacts/
 *.egg-info/
 dist/
 bin/
+
+# k8s
+k8s/cm.yml
