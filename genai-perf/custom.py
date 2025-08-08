@@ -25,13 +25,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
-import os
 import subprocess
+from itertools import product
 
-import jinja2
 import yaml
-
-TEMP_CONF_PATH = "/tmp/rendered_config.yml"
 
 
 def load_config(config_path):
@@ -39,6 +36,36 @@ def load_config(config_path):
     with open(config_path, "r") as file:
         config = yaml.safe_load(file)
     return config
+
+
+def generate_combinations(config) -> dict:
+    """Generate all combinations of model and token configurations."""
+    models = config.get("models", [])
+    token_confs = config.get("token_confs", {})
+    inputs = token_confs.get("input", [])
+    input_means = [i.get("mean") for i in inputs]
+    input_stddevs = [i.get("stddev") for i in inputs]
+    outputs = token_confs.get("output", [])
+    output_means = [o.get("mean") for o in outputs]
+    output_stddevs = [o.get("stddev") for o in outputs]
+    reqs = config.get("requests", {})
+    run_counts = reqs.get("run_count", [])
+    warmup_counts = reqs.get("warmup_count", [])
+    concurrency = reqs.get("concurrency", [1])
+
+    model_combinations = {}
+    for model in models:
+        model_combinations[model] = product(
+            input_means,
+            input_stddevs,
+            output_means,
+            output_stddevs,
+            run_counts,
+            warmup_counts,
+            concurrency,
+        )
+
+    return model_combinations
 
 
 if __name__ == "__main__":
@@ -51,45 +78,45 @@ if __name__ == "__main__":
         default="config.yml",
         help="Path to the configuration file",
     )
-    parser.add_argument(
-        "--template",
-        type=str,
-        default="config.yml.j2",
-        help="Path to the Jinja2 template file",
-    )
     args = parser.parse_args()
 
     config = load_config(args.config)
-
-    with open(args.template, "r") as template_file:
-        template_content = template_file.read()
-    template = jinja2.Template(template_content)
+    model_combinations = generate_combinations(config)
 
     # iterate models
-    index = 0
-    for model in config.get("models", []):
-        # iterate token_confs (input/output #tokens)
-        inputs = config.get("token_confs", {}).get("input", [])
-        outputs = config.get("token_confs", {}).get("output", [])
-        for i in inputs:
-            for o in outputs:
-                # render the template with the current model and token configuration
-                rendered_config = template.render(
-                    url=config.get("url", ""),
-                    model=model,
-                    synthetic_mean=str(i.get("mean")),
-                    synthetic_stddev=str(i.get("stddev")),
-                    output_mean=str(o.get("mean")),
-                    output_stddev=str(o.get("stddev")),
-                )
-
-                # Save the rendered configuration to a temp file and execute it
-                with open(TEMP_CONF_PATH, "w") as f:
-                    f.write(rendered_config)
-                subprocess.run(
-                    ["genai-perf", "config", "-f", TEMP_CONF_PATH],
-                )
-
-    # Clean up the temporary file
-    if os.path.exists(TEMP_CONF_PATH):
-        os.remove(TEMP_CONF_PATH)
+    for model, combinations in model_combinations.items():
+        for c in combinations:
+            subprocess.run(
+                [
+                    "genai-perf",
+                    "profile",
+                    "--url",
+                    config.get("url", ""),
+                    "--model",
+                    model,
+                    "--synthetic-input-tokens-mean",
+                    str(c[0]),
+                    "--synthetic-input-tokens-stddev",
+                    str(c[1]),
+                    "--output-tokens-mean",
+                    str(c[2]),
+                    "--output-tokens-stddev",
+                    str(c[3]),
+                    "--request-count",
+                    str(c[4]),
+                    "--warmup-request-count",
+                    str(c[5]),
+                    "--concurrency",
+                    str(c[6]),
+                    "--profile-export-file",
+                    f"{c[4]}_{c[5]}_profile.json",
+                    "--generate-plots",
+                    "--streaming",
+                    "--endpoint-type",
+                    "chat",
+                    "--tokenizer",
+                    "hf-internal-testing/llama-tokenizer",
+                    "--artifact-dir",
+                    "/artifacts",
+                ]
+            )

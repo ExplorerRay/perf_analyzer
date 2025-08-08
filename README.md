@@ -48,7 +48,7 @@ docker run --rm -it -v $(pwd):/aiperf -v $(pwd)/artifacts:/artifacts genaiperf
 
 kubectl apply -f k8s/job.yml
 
-kubectl create -n genai-perf cm genai-perf-config --from-file config.yml --from-file config.yml.j2 -o yaml --dry-run=client > k8s/cm.yml
+kubectl create -n genai-perf cm genai-perf-config --from-file config.yml -o yaml --dry-run=client > k8s/cm.yml
 kubectl apply -f k8s/cm.yml
 ```
 

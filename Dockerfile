@@ -27,7 +27,7 @@ FROM ubuntu:24.04
 
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get -y install \
-  python3-pip \
+  python3-pip libnss3 libatk-bridge2.0-0 libcups2 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0 libcairo2 libasound2t64 \
  && apt-get clean autoclean \
  && apt-get autoremove --yes \
  && rm -rf /var/lib/apt/lists/*
@@ -39,4 +39,6 @@ COPY ./genai-perf /genai-perf/
 RUN pip install /genai-perf --break-system-packages \
     && pip cache purge
 
-CMD ["python3", "/genai-perf/custom.py", "--config", "/aiperf/config.yml", "--template", "/aiperf/config.yml.j2"]
+RUN plotly_get_chrome -y
+
+CMD ["python3", "/genai-perf/custom.py", "--config", "/aiperf/config.yml"]
