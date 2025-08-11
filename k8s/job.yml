@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
         - name: genai-perf-container
-          image: explorerray/genaiperf
+          image: explorerray/genaiperf:v0.1.1
           volumeMounts:
             - name: results-volume
               mountPath: /artifacts

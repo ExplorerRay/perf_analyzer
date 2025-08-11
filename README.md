@@ -32,8 +32,6 @@ Triton Performance Analyzer is CLI tool which can help you optimize the
 inference performance of models running on Triton Inference Server by measuring
 changes in performance as you experiment with different optimization strategies.
 
-<br>
-
 # Usage
 ## Docker
 ```bash
@@ -44,8 +42,6 @@ docker run --rm -it -v $(pwd):/aiperf -v $(pwd)/artifacts:/artifacts genaiperf
 
 ## K8S
 ```bash
-# kubectl create cm genai-perf-config --from-file=config.yml --from-file=config.yml.j2
-
 kubectl apply -f k8s/job.yml
 
 kubectl create -n genai-perf cm genai-perf-config --from-file config.yml -o yaml --dry-run=client > k8s/cm.yml

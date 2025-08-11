@@ -51,7 +51,7 @@ def generate_combinations(config) -> dict:
     reqs = config.get("requests", {})
     run_counts = reqs.get("run_count", [])
     warmup_counts = reqs.get("warmup_count", [])
-    concurrency = reqs.get("concurrency", [1])
+    concurrency = config.get("concurrency", [])
 
     model_combinations = {}
     for model in models:
