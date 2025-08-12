@@ -82,41 +82,54 @@ if __name__ == "__main__":
 
     config = load_config(args.config)
     model_combinations = generate_combinations(config)
+    logging.init_logging()
+    logger = logging.getLogger(__name__)
 
     # iterate models
     for model, combinations in model_combinations.items():
         for c in combinations:
-            subprocess.run(
-                [
-                    "genai-perf",
-                    "profile",
-                    "--url",
-                    config.get("url", ""),
-                    "--model",
-                    model,
-                    "--synthetic-input-tokens-mean",
-                    str(c[0]),
-                    "--synthetic-input-tokens-stddev",
-                    str(c[1]),
-                    "--output-tokens-mean",
-                    str(c[2]),
-                    "--output-tokens-stddev",
-                    str(c[3]),
-                    "--request-count",
-                    str(c[4]),
-                    "--warmup-request-count",
-                    str(c[5]),
-                    "--concurrency",
-                    str(c[6]),
-                    "--profile-export-file",
-                    f"{c[4]}_{c[5]}_profile.json",
-                    "--generate-plots",
-                    "--streaming",
-                    "--endpoint-type",
-                    "chat",
-                    "--tokenizer",
-                    "hf-internal-testing/llama-tokenizer",
-                    "--artifact-dir",
-                    "/artifacts",
-                ]
-            )
+            endpoint_url = config.get("url", "")
+
+            # custom warmup request(s) for loading model to RAM
+            if c[5] > 0:
+                logger.info(
+                    f"Start running warmup for {model} with {c[5]} requests and {c[6]} concurrency"
+                )
+                custom_warmup(endpoint_url, model, c[5], c[6])
+                logger.info("Warmup completed")
+
+            # Set options for GenAI perf
+            cmd = [
+                "genai-perf",
+                "profile",
+                "--url",
+                str(endpoint_url),
+                "--model",
+                model,
+                "--synthetic-input-tokens-mean",
+                str(c[0]),
+                "--synthetic-input-tokens-stddev",
+                str(c[1]),
+                "--output-tokens-mean",
+                str(c[2]),
+                "--output-tokens-stddev",
+                str(c[3]),
+                "--request-count",
+                str(c[4]),
+                "--concurrency",
+                str(c[6]),
+                "--profile-export-file",
+                f"{c[4]}_{c[5]}_profile.json",
+                "--endpoint-type",
+                "chat",
+                "--tokenizer",
+                "hf-internal-testing/llama-tokenizer",
+                "--artifact-dir",
+                "/artifacts",
+            ]
+            if config.get("enabled", {}).get("gen_plots", False):
+                cmd.append("--generate-plots")
+            if config.get("enabled", {}).get("stream", False):
+                cmd.append("--streaming")
+            # Run GenAI perf
+            subprocess.run(cmd)
