@@ -26,8 +26,11 @@
 
 import argparse
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 from itertools import product
 
+import genai_perf.logging as logging
+import requests
 import yaml
 
 
@@ -49,9 +52,9 @@ def generate_combinations(config) -> dict:
     output_means = [o.get("mean") for o in outputs]
     output_stddevs = [o.get("stddev") for o in outputs]
     reqs = config.get("requests", {})
-    run_counts = reqs.get("run_count", [])
-    warmup_counts = reqs.get("warmup_count", [])
-    concurrency = config.get("concurrency", [])
+    run_counts = reqs.get("run_count", [0])
+    warmup_counts = reqs.get("warmup_count", [0])
+    concurrency = config.get("concurrency", [1])
 
     model_combinations = {}
     for model in models:
@@ -66,6 +69,36 @@ def generate_combinations(config) -> dict:
         )
 
     return model_combinations
+
+
+def warmup_request(url, model, warmup_id):
+    header = {"Content-Type": "application/json"}
+    warmup_data = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"Warmup {warmup_id + 1}"},
+        ],
+    }
+    try:
+        response = requests.post(url, headers=header, json=warmup_data)
+        response.raise_for_status()
+        return
+    except requests.RequestException as e:
+        print(f"Warmup request failed for warmup {warmup_id + 1}: {e}")
+        exit(1)
+
+
+def custom_warmup(url, model, warmup_count, concurrency):
+    """
+    Custom warmup for loading model to RAM (avoid cold-start)
+    with concurrency, without streaming, no response
+    if concurrency > warmup count, the max concurrency will be limited to warmup count
+    """
+    req_url = f"http://{url}/v1/chat/completions"
+    with ThreadPoolExecutor(max_workers=concurrency) as executor:
+        for w in range(warmup_count):
+            executor.submit(warmup_request, req_url, model, w)
 
 
 if __name__ == "__main__":
