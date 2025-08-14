@@ -36,12 +36,12 @@ models:
 concurrency:
   - 1
   - 2
+  - 4
+  - 8
 
 requests:
   run_count:
     - 10
-  warmup_count:
-    - 1
 
 token_confs:
   input:

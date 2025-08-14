@@ -53,7 +53,6 @@ def generate_combinations(config) -> dict:
     output_stddevs = [o.get("stddev") for o in outputs]
     reqs = config.get("requests", {})
     run_counts = reqs.get("run_count", [0])
-    warmup_counts = reqs.get("warmup_count", [0])
     concurrency = config.get("concurrency", [1])
 
     model_combinations = {}
@@ -64,7 +63,6 @@ def generate_combinations(config) -> dict:
             output_means,
             output_stddevs,
             run_counts,
-            warmup_counts,
             concurrency,
         )
 
@@ -126,9 +124,9 @@ if __name__ == "__main__":
             # custom warmup request(s) for loading model to RAM
             if c[5] > 0:
                 logger.info(
-                    f"Start running warmup for {model} with {c[5]} requests and {c[6]} concurrency"
+                    f"Start running warmup for {model} with {c[5]} requests and {c[5]} concurrency"
                 )
-                custom_warmup(endpoint_url, model, c[5], c[6])
+                custom_warmup(endpoint_url, model, c[5], c[5])
                 logger.info("Warmup completed")
 
             # Set options for GenAI perf
@@ -150,7 +148,7 @@ if __name__ == "__main__":
                 "--request-count",
                 str(c[4]),
                 "--concurrency",
-                str(c[6]),
+                str(c[5]),
                 "--profile-export-file",
                 f"{c[4]}_{c[5]}_profile.json",
                 "--endpoint-type",
