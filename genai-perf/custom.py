@@ -164,5 +164,9 @@ if __name__ == "__main__":
                 cmd.append("--generate-plots")
             if config.get("enabled", {}).get("stream", False):
                 cmd.append("--streaming")
+            if config.get("enabled", {}).get("checkpoint", False):
+                cmd.append("--enable-checkpointing")
+                cmd.append("--checkpoint-dir")
+                cmd.append("/artifacts")
             # Run GenAI perf
             subprocess.run(cmd)

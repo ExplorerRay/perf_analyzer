@@ -28,6 +28,7 @@ url: "10.5.6.103" # No iteration
 enabled:
   gen_plots: false
   stream: true
+  checkpoint: true
 
 models:
   - "gemma3:1b"
