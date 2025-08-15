@@ -46,11 +46,9 @@ def generate_combinations(config) -> dict:
     models = config.get("models", [])
     token_confs = config.get("token_confs", {})
     inputs = token_confs.get("input", [])
-    input_means = [i.get("mean") for i in inputs]
-    input_stddevs = [i.get("stddev") for i in inputs]
+    input_mean_stddev = [(i.get("mean"), i.get("stddev")) for i in inputs]
     outputs = token_confs.get("output", [])
-    output_means = [o.get("mean") for o in outputs]
-    output_stddevs = [o.get("stddev") for o in outputs]
+    output_mean_stddev = [(o.get("mean"), o.get("stddev")) for o in outputs]
     reqs = config.get("requests", {})
     run_counts = reqs.get("run_count", [0])
     concurrency = config.get("concurrency", [1])
@@ -58,10 +56,8 @@ def generate_combinations(config) -> dict:
     model_combinations = {}
     for model in models:
         model_combinations[model] = product(
-            input_means,
-            input_stddevs,
-            output_means,
-            output_stddevs,
+            input_mean_stddev,
+            output_mean_stddev,
             run_counts,
             concurrency,
         )
@@ -122,11 +118,11 @@ if __name__ == "__main__":
             endpoint_url = config.get("url", "")
 
             # custom warmup request(s) for loading model to RAM
-            if c[5] > 0:
+            if c[3] > 0:
                 logger.info(
-                    f"Start running warmup for {model} with {c[5]} requests and {c[5]} concurrency"
+                    f"Start running warmup for {model} with {c[3]} requests and {c[3]} concurrency"
                 )
-                custom_warmup(endpoint_url, model, c[5], c[5])
+                # custom_warmup(endpoint_url, model, c[3], c[3])
                 logger.info("Warmup completed")
 
             # Set options for GenAI perf
@@ -138,19 +134,19 @@ if __name__ == "__main__":
                 "--model",
                 model,
                 "--synthetic-input-tokens-mean",
-                str(c[0]),
+                str(c[0][0]),
                 "--synthetic-input-tokens-stddev",
-                str(c[1]),
+                str(c[0][1]),
                 "--output-tokens-mean",
-                str(c[2]),
+                str(c[1][0]),
                 "--output-tokens-stddev",
-                str(c[3]),
+                str(c[1][1]),
                 "--request-count",
-                str(c[4]),
+                str(c[2]),
                 "--concurrency",
-                str(c[5]),
+                str(c[3]),
                 "--profile-export-file",
-                f"{c[4]}_{c[5]}_profile.json",
+                f"{c[2]}_{c[3]}_profile.json",
                 "--endpoint-type",
                 "chat",
                 "--tokenizer",
