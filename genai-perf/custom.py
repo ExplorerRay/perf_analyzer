@@ -158,8 +158,6 @@ if __name__ == "__main__":
                 "--artifact-dir",
                 "/artifacts",
             ]
-            if config.get("enabled", {}).get("gen_plots", False):
-                cmd.append("--generate-plots")
             if config.get("enabled", {}).get("stream", False):
                 cmd.append("--streaming")
             if config.get("enabled", {}).get("checkpoint", False):

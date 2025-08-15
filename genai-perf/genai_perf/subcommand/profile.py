@@ -29,8 +29,6 @@ from typing import List, Optional
 from genai_perf.config.generate.perf_analyzer_config import PerfAnalyzerConfig
 from genai_perf.config.input.config_command import ConfigCommand
 from genai_perf.export_data.output_reporter import OutputReporter
-from genai_perf.plots.plot_config_parser import PlotConfigParser
-from genai_perf.plots.plot_manager import PlotManager
 from genai_perf.subcommand.subcommand import Subcommand
 
 
@@ -43,9 +41,6 @@ def profile_handler(config: ConfigCommand, extra_args: Optional[List[str]]) -> N
     """
     profile = Profile(config, extra_args)
     profile.profile()
-
-    if config.output.generate_plots:
-        profile.create_plots()
 
 
 ###########################################################################
@@ -75,7 +70,6 @@ class Profile(Subcommand):
             # Pre-amble
             self._create_tokenizer()
             self._create_artifact_directory(perf_analyzer_config)
-            self._create_plot_directory(perf_analyzer_config)
             self._generate_inputs(perf_analyzer_config)
 
             # Profile using Perf Analyzer
@@ -87,18 +81,3 @@ class Profile(Subcommand):
                 genai_perf_config, perf_analyzer_config, objectives
             )
             self._add_output_to_artifact_directory(perf_analyzer_config, objectives)
-
-    def create_plots(self) -> None:
-        # TMA-1911: support plots CLI option
-        # Create the same config objects as in profile() to get consistent paths
-        objectives = self._create_objectives_based_on_stimulus()
-        perf_analyzer_config = self._create_perf_analyzer_config(objectives)
-        plot_dir = perf_analyzer_config.get_artifact_directory() / "plots"
-        PlotConfigParser.create_init_yaml_config(
-            filenames=[perf_analyzer_config.get_profile_export_file()],
-            output_dir=plot_dir,
-        )
-        config_parser = PlotConfigParser(plot_dir / "config.yaml")
-        plot_configs = config_parser.generate_configs(self._config)
-        plot_manager = PlotManager(plot_configs)
-        plot_manager.generate_plots()
