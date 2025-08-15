@@ -42,6 +42,8 @@ docker run --rm -it -v $(pwd):/aiperf -v $(pwd)/artifacts:/artifacts genaiperf
 
 ## K8S
 ```bash
+export IMAGE_TAG=v0.3.0
+
 kubectl apply -f k8s/job.yml
 
 kubectl create -n genai-perf cm genai-perf-config --from-file config.yml -o yaml --dry-run=client > k8s/cm.yml
