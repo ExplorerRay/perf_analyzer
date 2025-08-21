@@ -23,43 +23,49 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-url: "10.5.6.103" # No iteration
+itpe_report:
+  prom_url: "http://192.168.0.151:9090" # Prometheus endpoint
+  artf_dir: "/artifacts"
 
-enabled:
-  stream: true
-  checkpoint: true
+itpe_perf:
+  url: "192.168.0.155" # No iteration, LLM svc endpoint
 
-models:
-  - "gemma3:1b"
+  enabled:
+    stream: true
+    checkpoint: false
 
-concurrency:
-  - 1
-  - 2
-  - 4
-  - 8
+  models:
+    - "gemma3:1b"
+    - "llama3.2:1b"
 
-requests:
-  run_count:
-    - 10
+  concurrency:
+    - 1
+    - 2
+    - 4
+    - 8
 
-token_confs:
-  input:
-    - name: "input-S" # < 256
-      mean: 150
-      stddev: 20
-    - name: "input-M" # 256 - 1024
-      mean: 650
-      stddev: 100
-    - name: "input-L" # <= 8192
-      mean: 4000
-      stddev: 300
-  output:
-    - name: "output-S" # < 100
-      mean: 50
-      stddev: 10
-    - name: "output-M" # 100 - 350
-      mean: 200
-      stddev: 20
-    - name: "output-L" # >= 350
-      mean: 480
-      stddev: 40
+  requests:
+    run_count:
+      - 10
+
+  token_confs:
+    input:
+      - name: "input-S" # < 256
+        mean: 150
+        stddev: 15
+      - name: "input-M" # 256 - 1024
+        mean: 650
+        stddev: 50
+      - name: "input-L" # <= 8192
+        mean: 1500
+        stddev: 100
+    output:
+      - name: "output-S" # < 100
+        mean: 50
+        stddev: 10
+      - name: "output-M" # 100 - 350
+        mean: 200
+        stddev: 20
+      - name: "output-L" # >= 350
+        mean: 450
+        stddev: 30

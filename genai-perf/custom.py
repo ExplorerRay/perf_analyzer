@@ -108,21 +108,22 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config = load_config(args.config)
-    model_combinations = generate_combinations(config)
+    itpe_perf_conf = config.get("itpe_perf", {})
+    model_combinations = generate_combinations(itpe_perf_conf)
     logging.init_logging()
     logger = logging.getLogger(__name__)
 
     # iterate models
     for model, combinations in model_combinations.items():
         for c in combinations:
-            endpoint_url = config.get("url", "")
+            endpoint_url = itpe_perf_conf.get("url", "")
 
             # custom warmup request(s) for loading model to RAM
             if c[3] > 0:
                 logger.info(
                     f"Start running warmup for {model} with {c[3]} requests and {c[3]} concurrency"
                 )
-                # custom_warmup(endpoint_url, model, c[3], c[3])
+                custom_warmup(endpoint_url, model, c[3], c[3])
                 logger.info("Warmup completed")
 
             # Set options for GenAI perf
@@ -154,9 +155,9 @@ if __name__ == "__main__":
                 "--artifact-dir",
                 "/artifacts",
             ]
-            if config.get("enabled", {}).get("stream", False):
+            if itpe_perf_conf.get("enabled", {}).get("stream", False):
                 cmd.append("--streaming")
-            if config.get("enabled", {}).get("checkpoint", False):
+            if itpe_perf_conf.get("enabled", {}).get("checkpoint", False):
                 cmd.append("--enable-checkpointing")
                 cmd.append("--checkpoint-dir")
                 cmd.append("/artifacts")
