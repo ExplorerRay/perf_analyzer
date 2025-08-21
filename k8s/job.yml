@@ -26,20 +26,20 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: genai-perf
+  name: itpe-perf
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: genai-perf-job
-  namespace: genai-perf
+  name: itpe-perf-job
+  namespace: itpe-perf
 spec:
   ttlSecondsAfterFinished: 5
   template:
     spec:
       containers:
-        - name: genai-perf-container
-          image: explorerray/genaiperf:${IMAGE_TAG}
+        - name: itpe-perf-container
+          image: explorerray/itpe-perf
           volumeMounts:
             - name: results-volume
               mountPath: /artifacts
@@ -54,4 +54,4 @@ spec:
             type: DirectoryOrCreate
         - name: config-volume
           configMap:
-            name: genai-perf-config
+            name: itpe-perf-config
